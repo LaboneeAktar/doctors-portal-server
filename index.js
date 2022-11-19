@@ -47,6 +47,7 @@ async function run() {
 
     const bookingCollection = client.db("doctorsPortal").collection("bookings");
     const usersCollection = client.db("doctorsPortal").collection("users");
+    const doctorsCollection = client.db("doctorsPortal").collection("doctors");
 
     //use Aggregate to query multiple collection and then merge data
     app.get("/appointmentOptions", async (req, res) => {
@@ -71,10 +72,19 @@ async function run() {
           (slot) => !bookedSlots.includes(slot)
         );
         option.slots = remainingSlots;
-        console.log(option.name, bookedSlots);
+        // console.log(option.name, bookedSlots);
       });
 
       res.send(options);
+    });
+
+    app.get("/appointmentSpecialty", async (req, res) => {
+      const query = {};
+      const result = await appointmentOptionCollection
+        .find(query)
+        .project({ name: 1 })
+        .toArray();
+      res.send(result);
     });
 
     app.get("/bookings", verifyJWT, async (req, res) => {
@@ -165,6 +175,12 @@ async function run() {
         updateDoc,
         options
       );
+      res.send(result);
+    });
+
+    app.post("/doctors", async (req, res) => {
+      const query = req.body;
+      const result = await doctorsCollection.insertOne(query);
       res.send(result);
     });
 
