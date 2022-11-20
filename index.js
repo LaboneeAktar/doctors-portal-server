@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
+const stripe = require("stripe")(provess.env.STRIPE_SECRET);
 require("dotenv").config();
 
 const app = express();
@@ -112,6 +113,13 @@ async function run() {
       res.send(bookings);
     });
 
+    app.get("/bookings/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const booking = await bookingCollection.findOne(query);
+      res.send(booking);
+    });
+
     app.post("/bookings", async (req, res) => {
       const booking = req.body;
       // console.log(booking);
@@ -181,6 +189,23 @@ async function run() {
       );
       res.send(result);
     });
+
+    //temporary to update price field on appointment options
+    /*  app.get("/addPrice", async (req, res) => {
+      const filter = {};
+      const options = { upsert: true };
+      const updatedDoc = {
+        $set: {
+          price: 99,
+        },
+      };
+      const result = await appointmentOptionCollection.updateMany(
+        filter,
+        updatedDoc,
+        options
+      );
+      res.send(result);
+    }); */
 
     app.get("/doctors", verifyJWT, verifyAdmin, async (req, res) => {
       const query = {};
